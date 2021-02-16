@@ -17,9 +17,9 @@ class SpotibarClient():
         '''
         TODO: Add args/kwargs here.
         '''
-        self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public",
-        self.client_id = os.environ['SPOTIBAR_CLIENT_ID'],
-        self.client_secret = os.environ['SPOTIBAR_CLIENT_SECRET'],
+        self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
+        self.client_id = os.environ['SPOTIBAR_CLIENT_ID']
+        self.client_secret = os.environ['SPOTIBAR_CLIENT_SECRET']
         self.redirect_uri = "http://127.0.0.1"
 
         self.client = self.get_client()
