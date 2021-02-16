@@ -4,12 +4,6 @@ import os
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-parser = argparse.ArgumentParser(
-    description='Entrypoint for Spotify/Polybar integration.'
-)
-
-args = parser.parse_args()
-
 
 class SpotibarClient():
 
@@ -146,7 +140,7 @@ class SpotibarClient():
         '''
         self.client.user_playlist_create(self.get_user_id(), name, public=public)
 
-    def get_monthly_playlist_id(self, name_format="%m || %y", create_if_empty=True):
+    def get_monthly_playlist_id(self, name_format="%m ¦¦ %y", create_if_empty=True):
         '''
         Returns the ID of the monthly playlist as described by the name format
         which uses strftime strings.
@@ -178,3 +172,30 @@ class SpotibarClient():
             self.get_monthly_playlist_id(),
             [self.get_current_track_id()]
         )
+
+
+spotibar_client = SpotibarClient()
+
+parser = argparse.ArgumentParser(
+    description='Entrypoint for Spotify/Polybar integration.'
+)
+
+group = parser.add_mutually_exclusive_group()
+group.add_argument("--get-currently-playing", action="store_true")
+group.add_argument("--previous-track", action="store_true")
+group.add_argument("--next-track", action="store_true")
+group.add_argument("--toggle-playback", action="store_true")
+group.add_argument("--add-track-to-monthly-playlist", action="store_true")
+
+args = parser.parse_args()
+
+if args.get_currently_playing:
+    print(spotibar_client.get_currently_playing_string())
+elif args.previous_track:
+    spotibar_client.previous()
+elif args.next_track:
+    spotibar_client.next()
+elif args.toggle_playback:
+    spotibar_client.toggle_playback()
+elif args.add_track_to_monthly_playlist:
+    spotibar_client.add_current_track_to_monthly_playlist()
