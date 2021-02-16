@@ -18,6 +18,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
+            'spotibar = client:main'
         ]
     }
 )

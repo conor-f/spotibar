@@ -185,31 +185,36 @@ class SpotibarClient():
         )
 
 
-spotibar_client = SpotibarClient()
+def main():
+    spotibar_client = SpotibarClient()
 
-parser = argparse.ArgumentParser(
-    description='Entrypoint for Spotify/Polybar integration.'
-)
+    parser = argparse.ArgumentParser(
+        description='Entrypoint for Spotify/Polybar integration.'
+    )
 
-group = parser.add_mutually_exclusive_group()
-group.add_argument("--get-currently-playing", action="store_true")
-group.add_argument("--previous-track", action="store_true")
-group.add_argument("--next-track", action="store_true")
-group.add_argument("--toggle-playback", action="store_true")
-group.add_argument("--add-track-to-monthly-playlist", action="store_true")
-group.add_argument("--auth", action="store_true")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--get-currently-playing", action="store_true")
+    group.add_argument("--previous-track", action="store_true")
+    group.add_argument("--next-track", action="store_true")
+    group.add_argument("--toggle-playback", action="store_true")
+    group.add_argument("--add-track-to-monthly-playlist", action="store_true")
+    group.add_argument("--auth", action="store_true")
 
-args = parser.parse_args()
+    args = parser.parse_args()
 
-if args.get_currently_playing:
-    print(spotibar_client.get_currently_playing_string())
-elif args.previous_track:
-    spotibar_client.previous()
-elif args.next_track:
-    spotibar_client.next()
-elif args.toggle_playback:
-    spotibar_client.toggle_playback()
-elif args.add_track_to_monthly_playlist:
-    spotibar_client.add_current_track_to_monthly_playlist()
-elif args.auth:
-    spotibar_client.auth()
+    if args.get_currently_playing:
+        print(spotibar_client.get_currently_playing_string())
+    elif args.previous_track:
+        spotibar_client.previous()
+    elif args.next_track:
+        spotibar_client.next()
+    elif args.toggle_playback:
+        spotibar_client.toggle_playback()
+    elif args.add_track_to_monthly_playlist:
+        spotibar_client.add_current_track_to_monthly_playlist()
+    elif args.auth:
+        spotibar_client.auth()
+
+
+if __name__ == '__main__':
+    main()
