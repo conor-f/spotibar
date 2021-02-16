@@ -35,6 +35,14 @@ class SpotibarClient():
             )
         )
 
+    def auth(self):
+        '''
+        Calls a method that requires authentication to ensure spotibar has
+        sorted out its permissions from Spotify.
+        '''
+        self.is_currently_playing()
+        print("Successfully authenticated.")
+
     def get_user_id(self):
         return self.client.me()['id']
 
@@ -94,15 +102,18 @@ class SpotibarClient():
         '''
         Returns the string ready for polybar
         '''
-        current_track_name = self.client.currently_playing()['item']['name']
-        current_artist_name = ', '.join(
-            [
-                artist['name']
-                for artist in self.client.currently_playing()['item']['artists']
-            ]
-        )
+        try:
+            current_track_name = self.client.currently_playing()['item']['name']
+            current_artist_name = ', '.join(
+                [
+                    artist['name']
+                    for artist in self.client.currently_playing()['item']['artists']
+                ]
+            )
 
-        return f"Currently Playing: {current_track_name} by {current_artist_name}"
+            return f"Currently Playing: {current_track_name} by {current_artist_name}"
+        except Exception:
+            return ""
 
     def get_current_track_id(self):
         return self.client.currently_playing()['item']['id']
@@ -186,6 +197,7 @@ group.add_argument("--previous-track", action="store_true")
 group.add_argument("--next-track", action="store_true")
 group.add_argument("--toggle-playback", action="store_true")
 group.add_argument("--add-track-to-monthly-playlist", action="store_true")
+group.add_argument("--auth", action="store_true")
 
 args = parser.parse_args()
 
@@ -199,3 +211,5 @@ elif args.toggle_playback:
     spotibar_client.toggle_playback()
 elif args.add_track_to_monthly_playlist:
     spotibar_client.add_current_track_to_monthly_playlist()
+elif args.auth:
+    spotibar_client.auth()
