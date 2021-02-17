@@ -15,7 +15,7 @@ class SpotibarClient():
         self.client_id = os.environ['SPOTIBAR_CLIENT_ID']
         self.client_secret = os.environ['SPOTIBAR_CLIENT_SECRET']
         self.redirect_uri = "http://127.0.0.1"
-        self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache/"
+        self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
 
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
