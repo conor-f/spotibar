@@ -23,7 +23,6 @@ class SpotibarClient():
         Returns the spotipy client ready for use.
 
         TODO: Add links to permissions explanations here?
-        TODO: Add cache location
         Example: https://developer.spotify.com/documentation/general/guides/scopes/#playlist-modify-private
         '''
         return spotipy.Spotify(
@@ -31,7 +30,8 @@ class SpotibarClient():
                 scope=self.scope,
                 client_id=self.client_id,
                 client_secret=self.client_secret,
-                redirect_uri=self.redirect_uri
+                redirect_uri=self.redirect_uri,
+                cache_path="~/.cache/spotibar_cache"
             )
         )
 
