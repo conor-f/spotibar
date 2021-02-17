@@ -37,9 +37,7 @@ class SpotibarClient():
                 client_id=self.client_id,
                 client_secret=self.client_secret,
                 redirect_uri=self.redirect_uri,
-                cache_handler=spotipy.cache_handler.CacheFileHandler(
-                    cache_path=f"{self.cache_dir}/{self.cache_file}"
-                )
+                cache_path=f"{self.cache_dir}/{self.cache_file}"
             )
         )
 
