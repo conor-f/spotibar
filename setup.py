@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
 setup(
     name='spotibar',
     description='Spotify plugin for Polybar',
-    version='0.0.1',
+    version='0.0.13',
     url='https://github.com/conor-f/spotibar',
     python_requires='>=3.6',
     packages=find_packages('src'),
@@ -18,7 +18,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
-            'spotibar = client:main'
+            'spotibar = spotibar.client:main'
         ]
     }
 )

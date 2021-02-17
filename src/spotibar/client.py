@@ -1,8 +1,8 @@
 import argparse
-from datetime import datetime
 import os
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+
+from datetime import datetime
 
 
 class SpotibarClient():
@@ -15,6 +15,12 @@ class SpotibarClient():
         self.client_id = os.environ['SPOTIBAR_CLIENT_ID']
         self.client_secret = os.environ['SPOTIBAR_CLIENT_SECRET']
         self.redirect_uri = "http://127.0.0.1"
+        self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
+
+        if not os.path.exists(self.cache_dir):
+            os.makedirs(self.cache_dir)
+
+        self.cache_file = "auth_cache"
 
         self.client = self.get_client()
 
@@ -23,15 +29,15 @@ class SpotibarClient():
         Returns the spotipy client ready for use.
 
         TODO: Add links to permissions explanations here?
-        TODO: Add cache location
         Example: https://developer.spotify.com/documentation/general/guides/scopes/#playlist-modify-private
         '''
         return spotipy.Spotify(
-            auth_manager=SpotifyOAuth(
+            auth_manager=spotipy.oauth2.SpotifyOAuth(
                 scope=self.scope,
                 client_id=self.client_id,
                 client_secret=self.client_secret,
-                redirect_uri=self.redirect_uri
+                redirect_uri=self.redirect_uri,
+                cache_path=f"{self.cache_dir}/{self.cache_file}"
             )
         )
 
