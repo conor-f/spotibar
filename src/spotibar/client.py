@@ -31,7 +31,7 @@ class SpotibarClient():
                 client_id=self.client_id,
                 client_secret=self.client_secret,
                 redirect_uri=self.redirect_uri,
-                cache_path="~/.spotibar_config/auth_cache"
+                cache_path="~/.spotibar_auth_cache"
             )
         )
 
