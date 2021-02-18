@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import spotipy
 
@@ -12,8 +13,17 @@ class SpotibarClient():
         TODO: Add args/kwargs here.
         '''
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
-        self.client_id = os.environ['SPOTIBAR_CLIENT_ID']
-        self.client_secret = os.environ['SPOTIBAR_CLIENT_SECRET']
+
+        try:
+            with open(os.path.expanduser("~") + "/.spotibar_config.json") as fh:
+                config = json.load(fh)
+
+                self.client_id = config['client_id']
+                self.client_secret = config['client_secret']
+        except Exception as e:
+            print("Problem with your ~/.spotibar_config.json!")
+            print(e)
+
         self.redirect_uri = "http://127.0.0.1"
         self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
 
@@ -117,7 +127,7 @@ class SpotibarClient():
                 ]
             )
 
-            return f"Currently Playing: {current_track_name} by {current_artist_name}"
+            return f"{current_track_name} by {current_artist_name}"
         except Exception:
             return ""
 
