@@ -20,6 +20,12 @@ class SpotibarClient():
 
                 self.client_id = config['client_id']
                 self.client_secret = config['client_secret']
+                self.currently_playing_trunclen = int(
+                    config.get(
+                        'currently_playing_trunclen',
+                        45
+                    )
+                )
         except Exception as e:
             print("Problem with your ~/.spotibar_config.json!")
             print(e)
@@ -127,7 +133,13 @@ class SpotibarClient():
                 ]
             )
 
-            return f"{current_track_name} by {current_artist_name}"
+            current_string = f"{current_track_name} by {current_artist_name}"
+
+            if len(current_string) > self.currently_playing_trunclen:
+                return current_string[:self.currently_playing_trunclen - 3] \
+                    + "..."
+            else:
+                return current_string
         except Exception:
             return ""
 
