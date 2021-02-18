@@ -6,14 +6,19 @@ requires a Spotify premium account.
 ## Features:
   - [x] Display currently playing artist/song
   - [x] Play/Pause, Previous, Next functionality
-  - [ ] Add to playlist (API work done, just needs a trigger in polybar)
+  - [x] Add to playlist
+  - [ ] Scroll currently playing tracking output
+  - [ ] Have other options for selecting what playlist to add to
+  - [ ] Support different formats for currently playing track text
+  - [ ] Add last.fm hearting track option
 
 ## Installation:
   Installation is in three steps, the first is getting credentials from [Spotify](https://developer.spotify.com/dashboard/applications). You need to create an app (call it whatever suits) and take the `Client ID` and `Client Secret` and add them to `~/.spotibar_config.json` as follows:
 ```
 {
   "client_id": "XXXXX",
-  "client_secret": "XXXXX"
+  "client_secret": "XXXXX",
+  "currently_playing_trunclen": "45"
 }
 ```
 
@@ -29,7 +34,7 @@ a message similar to `Successfully authenticated.`.
   Once `spotibar` is installed and authenticated, you need to modify your
 polybar config as follows (or however suits your needs!):
 ```
-modules-right = <other modules> spotibar-currently-playing spotibar-previous-track spotibar-toggle-playback spotibar-next-track <other modules>
+modules-right = <other modules> spotibar-currently-playing spotibar-previous-track spotibar-toggle-playback spotibar-next-track spotibar-add-to-playlist <other modules>
 
 [module/spotibar-previous-track]
 type = custom/script
@@ -59,6 +64,14 @@ format-padding = 2
 type = custom/script
 exec = spotibar --get-currently-playing
 click-left = i3-msg '[class="Spotify"] focus'
+exec-if = "pgrep spotify"
+format-underline = #1db954
+format-padding = 2
+
+[module/spotibar-add-to-playlist]
+type = custom/script
+exec = echo "≣"
+click-left = spotibar --add-track-to-monthly-playlist
 exec-if = "pgrep spotify"
 format-underline = #1db954
 format-padding = 2
