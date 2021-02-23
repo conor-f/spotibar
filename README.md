@@ -72,6 +72,7 @@ format-padding = 2
 type = custom/script
 exec = echo "≣"
 click-left = spotibar --add-track-to-monthly-playlist
+click-right = spotibar --config-popup
 exec-if = "pgrep spotify"
 format-underline = #1db954
 format-padding = 2

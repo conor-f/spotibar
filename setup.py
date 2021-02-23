@@ -4,13 +4,14 @@ from setuptools import (
 )
 
 INSTALL_REQUIRES = [
+    'pylast',
     'spotipy'
 ]
 
 setup(
     name='spotibar',
     description='Spotify plugin for Polybar',
-    version='0.1.2',
+    version='0.1.3',
     url='https://github.com/conor-f/spotibar',
     python_requires='>=3.6',
     packages=find_packages('src'),

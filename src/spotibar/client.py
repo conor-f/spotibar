@@ -1,5 +1,6 @@
 import argparse
 import os
+import pylast
 import spotipy
 
 from .config_helper import SpotibarConfig
@@ -32,6 +33,8 @@ class SpotibarClient():
 
         self.client = self.get_client()
 
+        self.lastfm_client = self.get_lastfm_client()
+
     def get_client(self):
         '''
         Returns the spotipy client ready for use.
@@ -48,6 +51,19 @@ class SpotibarClient():
                 cache_path=f"{self.cache_dir}/{self.cache_file}"
             )
         )
+
+    def get_lastfm_client(self):
+        if self.config.get('should_heart_on_lastfm', False):
+            try:
+                return pylast.LastFMNetwork(
+                    api_key=self.config.get('lastfm_api_key', None),
+                    api_secret=self.config.get('lastfm_api_secret', None),
+                    username=self.config.get('lastfm_username', None),
+                    password_hash=self.config.get('lastfm_password_hash', None),
+                )
+            except Exception as e:
+                print("Please configure ~/.spotibar_config.json with last.fm details.")
+                print(e)
 
     def auth(self):
         '''
@@ -204,6 +220,20 @@ class SpotibarClient():
                 self.get_monthly_playlist_id(),
                 [self.get_current_track_id()]
             )
+
+        if self.config.get('should_heart_on_lastfm', False):
+            try:
+                currently_playing = self.get_currently_playing_string()
+
+                # TODO: Hacky. Works as long as the artist doesn't use the word
+                # ' by '
+                artist = currently_playing.split(' by ')[-1]
+                track = ' '.join(currently_playing.split(' by ')[:-1])
+
+                self.lastfm_client.get_track(artist, track).love()
+            except Exception as e:
+                print("Hearting track on lastfm failed.")
+                print(e)
 
 
 def main():
