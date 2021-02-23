@@ -1,9 +1,11 @@
 import argparse
-import json
 import os
+import pylast
 import spotipy
 
+from .config_helper import SpotibarConfig
 from datetime import datetime
+from .popups import ConfigPopup
 
 
 class SpotibarClient():
@@ -13,22 +15,13 @@ class SpotibarClient():
         TODO: Add args/kwargs here.
         '''
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
+        self.config = SpotibarConfig()
 
-        try:
-            with open(os.path.expanduser("~") + "/.spotibar_config.json") as fh:
-                config = json.load(fh)
-
-                self.client_id = config['client_id']
-                self.client_secret = config['client_secret']
-                self.currently_playing_trunclen = int(
-                    config.get(
-                        'currently_playing_trunclen',
-                        45
-                    )
-                )
-        except Exception as e:
-            print("Problem with your ~/.spotibar_config.json!")
-            print(e)
+        self.client_id = self.config.get('client_id', None)
+        self.client_secret = self.config.get('client_secret', None)
+        self.currently_playing_trunclen = int(
+            self.config.get('currently_playing_trunclen', 45)
+        )
 
         self.redirect_uri = "http://127.0.0.1"
         self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
@@ -39,6 +32,8 @@ class SpotibarClient():
         self.cache_file = "auth_cache"
 
         self.client = self.get_client()
+
+        self.lastfm_client = self.get_lastfm_client()
 
     def get_client(self):
         '''
@@ -56,6 +51,19 @@ class SpotibarClient():
                 cache_path=f"{self.cache_dir}/{self.cache_file}"
             )
         )
+
+    def get_lastfm_client(self):
+        if self.config.get('should_heart_on_lastfm', False):
+            try:
+                return pylast.LastFMNetwork(
+                    api_key=self.config.get('lastfm_api_key', None),
+                    api_secret=self.config.get('lastfm_api_secret', None),
+                    username=self.config.get('lastfm_username', None),
+                    password_hash=self.config.get('lastfm_password_hash', None),
+                )
+            except Exception as e:
+                print("Please configure ~/.spotibar_config.json with last.fm details.")
+                print(e)
 
     def auth(self):
         '''
@@ -207,10 +215,25 @@ class SpotibarClient():
             return playlist_id[0]
 
     def add_current_track_to_monthly_playlist(self):
-        self.client.playlist_add_items(
-            self.get_monthly_playlist_id(),
-            [self.get_current_track_id()]
-        )
+        if self.config.get('should_put_to_monthly_playlist', True):
+            self.client.playlist_add_items(
+                self.get_monthly_playlist_id(),
+                [self.get_current_track_id()]
+            )
+
+        if self.config.get('should_heart_on_lastfm', False):
+            try:
+                currently_playing = self.get_currently_playing_string()
+
+                # TODO: Hacky. Works as long as the artist doesn't use the word
+                # ' by '
+                artist = currently_playing.split(' by ')[-1]
+                track = ' '.join(currently_playing.split(' by ')[:-1])
+
+                self.lastfm_client.get_track(artist, track).love()
+            except Exception as e:
+                print("Hearting track on lastfm failed.")
+                print(e)
 
 
 def main():
@@ -227,6 +250,7 @@ def main():
     group.add_argument("--toggle-playback", action="store_true")
     group.add_argument("--add-track-to-monthly-playlist", action="store_true")
     group.add_argument("--auth", action="store_true")
+    group.add_argument("--config-popup", action="store_true")
 
     args = parser.parse_args()
 
@@ -242,6 +266,8 @@ def main():
         spotibar_client.add_current_track_to_monthly_playlist()
     elif args.auth:
         spotibar_client.auth()
+    elif args.config_popup:
+        ConfigPopup()
 
 
 if __name__ == '__main__':
