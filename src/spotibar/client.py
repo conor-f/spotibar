@@ -1,9 +1,10 @@
 import argparse
-import json
 import os
 import spotipy
 
+from .config_helper import SpotibarConfig
 from datetime import datetime
+from .popups import ConfigPopup
 
 
 class SpotibarClient():
@@ -13,22 +14,13 @@ class SpotibarClient():
         TODO: Add args/kwargs here.
         '''
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
+        self.config = SpotibarConfig()
 
-        try:
-            with open(os.path.expanduser("~") + "/.spotibar_config.json") as fh:
-                config = json.load(fh)
-
-                self.client_id = config['client_id']
-                self.client_secret = config['client_secret']
-                self.currently_playing_trunclen = int(
-                    config.get(
-                        'currently_playing_trunclen',
-                        45
-                    )
-                )
-        except Exception as e:
-            print("Problem with your ~/.spotibar_config.json!")
-            print(e)
+        self.client_id = self.config.get('client_id', None)
+        self.client_secret = self.config.get('client_secret', None)
+        self.currently_playing_trunclen = int(
+            self.config.get('currently_playing_trunclen', 45)
+        )
 
         self.redirect_uri = "http://127.0.0.1"
         self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
@@ -207,10 +199,11 @@ class SpotibarClient():
             return playlist_id[0]
 
     def add_current_track_to_monthly_playlist(self):
-        self.client.playlist_add_items(
-            self.get_monthly_playlist_id(),
-            [self.get_current_track_id()]
-        )
+        if self.config.get('should_put_to_monthly_playlist', True):
+            self.client.playlist_add_items(
+                self.get_monthly_playlist_id(),
+                [self.get_current_track_id()]
+            )
 
 
 def main():
@@ -227,6 +220,7 @@ def main():
     group.add_argument("--toggle-playback", action="store_true")
     group.add_argument("--add-track-to-monthly-playlist", action="store_true")
     group.add_argument("--auth", action="store_true")
+    group.add_argument("--config-popup", action="store_true")
 
     args = parser.parse_args()
 
@@ -242,6 +236,8 @@ def main():
         spotibar_client.add_current_track_to_monthly_playlist()
     elif args.auth:
         spotibar_client.auth()
+    elif args.config_popup:
+        ConfigPopup()
 
 
 if __name__ == '__main__':
