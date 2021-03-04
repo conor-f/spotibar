@@ -9,8 +9,19 @@ requires a Spotify premium account.
   - [x] Add to playlist
   - [ ] Scroll currently playing tracking output
   - [ ] Have other options for selecting what playlist to add to
-  - [ ] Support different formats for currently playing track text
-  - [ ] Add last.fm hearting track option
+  - [x] Add last.fm hearting track option
+
+## Usage/Experience:
+  After installing and configuring `spotibar` to run on your Polybar as
+described below, you should see the currently playing track/artist, interactive
+controls to go to the previous song, play/pause and go to the next track. The
+thing that justifies the little bit of extra work to set up this module is in
+the final icon, options/playlists. If you right click on this option, you will
+get a config option popup which lets you enable/disable adding tracks you like
+to a Spotify playlist, hearting the track on last.fm, the different display
+options, etc. It will also allow you to select multiple playlists to add to at
+once, and other options. Clicking it will trigger all liking/adding to playlist
+options.
 
 ## Installation:
   Installation is in three steps, the first is getting credentials from [Spotify](https://developer.spotify.com/dashboard/applications). You need to create an app (call it whatever suits) and take the `Client ID` and `Client Secret` and add them to `~/.spotibar_config.json` as follows:
@@ -18,7 +29,6 @@ requires a Spotify premium account.
 {
   "client_id": "XXXXX",
   "client_secret": "XXXXX",
-  "currently_playing_trunclen": "45"
 }
 ```
 
