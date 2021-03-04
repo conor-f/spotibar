@@ -9,8 +9,8 @@ requires a Spotify premium account.
   - [x] Add to playlist
   - [ ] Scroll currently playing tracking output
   - [ ] Have other options for selecting what playlist to add to
-  - [ ] Support different formats for currently playing track text
-  - [ ] Add last.fm hearting track option
+  - [x] Support different formats for currently playing track text
+  - [x] Add last.fm hearting track option
 
 ## Installation:
   Installation is in three steps, the first is getting credentials from [Spotify](https://developer.spotify.com/dashboard/applications). You need to create an app (call it whatever suits) and take the `Client ID` and `Client Secret` and add them to `~/.spotibar_config.json` as follows:

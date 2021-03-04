@@ -19,6 +19,10 @@ class ConfigPopup():
             self.root,
             self.config.get('should_heart_on_lastfm', True)
         )
+        self.currently_playing_trunclen = IntVar(
+            self.root,
+            self.config.get('currently_playing_trunclen', 45)
+        )
 
         Label(self.root, text="Put to monthly playlist?").grid(row=0, column=0)
         Checkbutton(
@@ -33,6 +37,23 @@ class ConfigPopup():
             variable=self.should_heart_on_lastfm,
             command=self.handle_should_heart_on_lastfm
         ).grid(row=1, column=1)
+
+        Label(self.root, text="Currently playing max length: ").grid(
+            row=2,
+            column=0
+        )
+        trunclen_entry_box = Entry(
+            self.root,
+            textvariable=self.currently_playing_trunclen,
+            width=3
+        )
+        trunclen_entry_box.grid(
+            row=2, column=1
+        )
+        trunclen_entry_box.bind(
+            "<Return>",
+            lambda event: self.handle_set_currently_playing_trunclen()
+        )
 
         self.attach_close_window_handler()
         self.root.mainloop()
@@ -66,4 +87,10 @@ class ConfigPopup():
         self.config.set(
             'should_heart_on_lastfm',
             self.should_heart_on_lastfm.get()
+        )
+
+    def handle_set_currently_playing_trunclen(self):
+        self.config.set(
+            'currently_playing_trunclen',
+            int(self.currently_playing_trunclen.get())
         )
