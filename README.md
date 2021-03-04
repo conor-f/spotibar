@@ -9,7 +9,6 @@ requires a Spotify premium account.
   - [x] Add to playlist
   - [ ] Scroll currently playing tracking output
   - [ ] Have other options for selecting what playlist to add to
-  - [x] Support different formats for currently playing track text
   - [x] Add last.fm hearting track option
 
 ## Installation:
