@@ -14,7 +14,7 @@ assert_clean:
 	fi
 
 upload_pip: assert_clean test
-	python setup.py sdist upload -r pypi
+	twine upload --repository pypi dist/*
 
 build:
 	$(IN_ENV) $(PYTHON) -m pip install --editable .
