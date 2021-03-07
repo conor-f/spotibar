@@ -13,7 +13,7 @@ assert_clean:
 			exit 1; \
 	fi
 
-upload_pip: assert_clean test
+upload_pip: assert_clean test build_dist 
 	twine upload --repository pypi dist/*
 
 build:
