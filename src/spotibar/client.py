@@ -1,10 +1,12 @@
 import argparse
+import json
 import os
 import pylast
 import spotipy
 
 from .config_helper import SpotibarConfig
 from datetime import datetime
+from getpass import getpass
 from .popups import ConfigPopup
 
 
@@ -236,6 +238,71 @@ class SpotibarClient():
                 print(e)
 
 
+def first_run():
+    '''
+    Runs the first time Spotibar is initialized. Gives a basic interactive menu
+    and asks the user for details to init the config file.
+    '''
+    print("\tWelcome to Spotibar!")
+    print("This script will set up the initial config file and enable/disable/configure features based on your preferences.")
+
+    config = {}
+
+    response = input("Do you want to add tracks to a monthly playlist? [Y/n]")
+    if response == "" or response.lower() == "y":
+        config['should_put_to_monthly_playlist'] = True
+    else:
+        config['should_put_to_monthly_playlist'] = False
+
+    response = input("Do you want to set up LastFM track hearting? [Y/n]")
+    if response == "" or response.lower() == "y":
+        print("Setting up LastFM track hearting...")
+        print("\tPlease go to https://www.last.fm/api/account/create to get your credentials:")
+
+        config['should_heart_on_lastfm'] = True
+
+        response = input("\tAPI Key: ")
+        config['lastfm_api_key'] = response
+
+        response = input("\tShared Secret: ")
+        config['lastfm_api_secret'] = response
+
+        response = input("\tLastFM Username: ")
+        config['lastfm_username'] = response
+
+        response = pylast.md5(getpass("\tLastFM Password (This will be immediately hashed): "))
+        config['lastfm_password_hash'] = response
+    else:
+        config['should_heart_on_lastfm'] = False
+        config['lastfm_api_key'] = ''
+        config['lastfm_api_secret'] = ''
+        config['lastfm_username'] = ''
+        config['lastfm_password_hash'] = ''
+        print("Skipping LastFM track hearting setup.")
+
+    print("Please go to https://developer.spotify.com/dashboard/applications to set up an application to get the following API keys. See the README for more details.")
+    response = input("\tSpotify client ID: ")
+    config['client_id'] = response
+    response = input("\tSpotify client secret: ")
+    config['client_secret'] = response
+
+    spotibar_client = SpotibarClient()
+    spotibar_client.auth()
+
+    try:
+        path = os.path.expanduser("~") + "/.spotibar_config.json"
+        with open(path, 'w') as fh:
+            json.dump(config, fh)
+    except Exception as e:
+        print("Problem writing to ~/.spotibar_config.json!")
+        print(e)
+
+        print("Here's your config to manually add:")
+        print(config)
+
+        return
+
+
 def main():
     spotibar_client = SpotibarClient()
 
@@ -251,6 +318,7 @@ def main():
     group.add_argument("--add-track-to-monthly-playlist", action="store_true")
     group.add_argument("--auth", action="store_true")
     group.add_argument("--config-popup", action="store_true")
+    group.add_argument("--init", action="store_true")
 
     args = parser.parse_args()
 
@@ -268,6 +336,8 @@ def main():
         spotibar_client.auth()
     elif args.config_popup:
         ConfigPopup()
+    elif args.init:
+        first_run()
 
 
 if __name__ == '__main__':
