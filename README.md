@@ -90,6 +90,9 @@ format-padding = 2
 
   Done! Enjoy! File (probably inevitable) bug reports as issues!
 
+  If you like, you can run `spotibar --init` in order to get some extra
+features like LastFM integration.
+
 ## Development:
   Create an issue if you have any bug reports/feature requests/want to add
 a feature and are looking for help with the environment setup.
