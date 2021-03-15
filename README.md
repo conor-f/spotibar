@@ -11,6 +11,9 @@ requires a Spotify premium account.
   - [ ] Have other options for selecting what playlist to add to
   - [x] Add last.fm hearting track option
 
+![Spotibar Config Menu](https://user-images.githubusercontent.com/2671067/111181822-42feeb00-85a6-11eb-820e-585864233923.png)
+![spotibar_Closed](https://user-images.githubusercontent.com/2671067/111181789-3aa6b000-85a6-11eb-8511-da536700438a.png)
+
 ## Usage/Experience:
   After installing and configuring `spotibar` to run on your Polybar as
 described below, you should see the currently playing track/artist, interactive
