@@ -237,6 +237,12 @@ class SpotibarClient():
                 print("Hearting track on lastfm failed.")
                 print(e)
 
+    def is_live(self):
+        '''
+        Returns True if Spotify is currently playing, False otherwise.
+        '''
+        return self.is_currently_playing()
+
 
 def first_run():
     '''
@@ -318,6 +324,7 @@ def main():
     group.add_argument("--add-track-to-monthly-playlist", action="store_true")
     group.add_argument("--auth", action="store_true")
     group.add_argument("--config-popup", action="store_true")
+    group.add_argument("--is-live", action="store_true")
     group.add_argument("--init", action="store_true")
 
     args = parser.parse_args()
@@ -336,6 +343,8 @@ def main():
         spotibar_client.auth()
     elif args.config_popup:
         ConfigPopup()
+    elif args.is_live:
+        print(spotibar_client.is_live())
     elif args.init:
         first_run()
 
