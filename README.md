@@ -53,7 +53,7 @@ modules-right = <other modules> spotibar-currently-playing spotibar-previous-tra
 type = custom/script
 exec = echo ""
 click-left = spotibar --previous-track
-exec-if = "pgrep spotify"
+exec-if = [ $(spotibar --is-live) = "True" ]
 format-underline = #1db954
 format-padding = 2
 
@@ -61,7 +61,7 @@ format-padding = 2
 type = custom/script
 exec = echo ""
 click-left = spotibar --next-track
-exec-if = "pgrep spotify"
+exec-if = [ $(spotibar --is-live) = "True" ]
 format-underline = #1db954
 format-padding = 2
 
@@ -77,7 +77,7 @@ format-padding = 2
 type = custom/script
 exec = spotibar --get-currently-playing
 click-left = i3-msg '[class="Spotify"] focus'
-exec-if = "pgrep spotify"
+exec-if = [ $(spotibar --is-live) = "True" ]
 format-underline = #1db954
 format-padding = 2
 
@@ -86,7 +86,7 @@ type = custom/script
 exec = echo "≣"
 click-left = spotibar --add-track-to-monthly-playlist
 click-right = spotibar --config-popup
-exec-if = "pgrep spotify"
+exec-if = [ $(spotibar --is-live) = "True" ]
 format-underline = #1db954
 format-padding = 2
 ```
