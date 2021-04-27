@@ -34,7 +34,7 @@ options.
   "client_secret": "XXXXX",
 }
 ```
-
+  After getting these values from the Spotify Developer Console, you need to add a redirect URL. Click "Edit Settings" and paste `http://127.0.0.1` under *Redirect URIs*.
   Secondly, you need to install and authenticate `spotibar`:
 ```
 python3 -m pip install spotibar
@@ -43,6 +43,8 @@ spotibar --auth
   This should open up a browser at `127.0.0.1`. Copy the entire URL and paste
 it back into the terminal window you ran `spotibar --auth` from. You should see
 a message similar to `Successfully authenticated.`.
+
+  If you're getting errors, try removing spotibar and reinstalling under sudo permissions. If you get an error involving `libtk8.6.so`, install tk using your distro's package manager.
   
   Once `spotibar` is installed and authenticated, you need to modify your
 polybar config as follows (or however suits your needs!):
