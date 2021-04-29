@@ -214,9 +214,9 @@ class SpotibarClient():
         ]
 
         if len(playlist_id) == 0 and create_if_empty:
-            self.create_playlist(datetime.now().strftime(name_format))
+            self.create_playlist(name)
             return self.get_monthly_playlist_id(
-                name_format=name_format,
+                name,
                 create_if_empty=create_if_empty
             )
         elif len(playlist_id) == 1:
