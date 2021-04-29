@@ -12,12 +12,14 @@ from .popups import ConfigPopup
 
 class SpotibarClient():
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         '''
-        TODO: Add args/kwargs here.
+        :kwarg config_file: String path relative to ~/ of a config file to load.
         '''
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
-        self.config = SpotibarConfig()
+
+        self.config_file = kwargs.get('config_file', '.spotibar_config.json')
+        self.config = SpotibarConfig(config_file=self.config_file)
 
         self.client_id = self.config.get('client_id', None)
         self.client_secret = self.config.get('client_secret', None)
@@ -64,7 +66,7 @@ class SpotibarClient():
                     password_hash=self.config.get('lastfm_password_hash', None),
                 )
             except Exception as e:
-                print("Please configure ~/.spotibar_config.json with last.fm details.")
+                print(f"Please configure ~/{self.config_file} with last.fm details.")
                 print(e)
 
     def auth(self):
@@ -156,6 +158,16 @@ class SpotibarClient():
     def get_current_track_id(self):
         return self.client.currently_playing()['item']['id']
 
+    def get_track_id_from_name(self, artist_name, track_name):
+        results = self.client.search(
+            q=f'artist:{artist_name} track: {track_name}', type='track'
+        )
+
+        try:
+            return results['tracks']['items'][0]['id']
+        except Exception:
+            return None
+
     def get_user_playlists(self):
         '''
         Returns a list of dicts representing all the users playlists.
@@ -189,19 +201,16 @@ class SpotibarClient():
         '''
         self.client.user_playlist_create(self.get_user_id(), name, public=public)
 
-    def get_monthly_playlist_id(self, name_format="%m ¦¦ %y", create_if_empty=True):
+    def get_playlist_id_from_name(self, name, create_if_empty=True):
         '''
-        Returns the ID of the monthly playlist as described by the name format
-        which uses strftime strings.
-
-        :kwarg create_if_empty: If True, creates the playlist if it doesn't exist
-        and return that ID.
+        Return the string ID of the playlist name specified and if doesn't
+        exist, create it.
         '''
         playlists = self.get_user_playlists()
 
         playlist_id = [
             playlist['id'] for playlist in playlists
-            if playlist['name'] == datetime.now().strftime(name_format)
+            if playlist['name'] == name
         ]
 
         if len(playlist_id) == 0 and create_if_empty:
@@ -216,11 +225,29 @@ class SpotibarClient():
             print("TODO: ERROR HANDLING! SHOULDN'T BE POSSIBLE.")
             return playlist_id[0]
 
+    def get_monthly_playlist_id(self, name_format="%m ¦¦ %y", create_if_empty=True):
+        '''
+        Returns the ID of the monthly playlist as described by the name format
+        which uses strftime strings.
+
+        :kwarg create_if_empty: If True, creates the playlist if it doesn't exist
+        and return that ID.
+        '''
+        monthly_playlist_name = datetime.now().strftime(name_format)
+
+        return self.get_playlist_id_from_name(
+            monthly_playlist_name,
+            create_if_empty=create_if_empty
+        )
+
+    def add_track_to_playlist(self, track_id, playlist_id):
+        self.client.playlist_add_items(playlist_id, [track_id])
+
     def add_current_track_to_monthly_playlist(self):
         if self.config.get('should_put_to_monthly_playlist', True):
-            self.client.playlist_add_items(
+            self.add_track_to_playlist(
                 self.get_monthly_playlist_id(),
-                [self.get_current_track_id()]
+                self.get_current_track_id()
             )
 
         if self.config.get('should_heart_on_lastfm', False):
@@ -296,11 +323,11 @@ def first_run():
     spotibar_client.auth()
 
     try:
-        path = os.path.expanduser("~") + "/.spotibar_config.json"
+        path = os.path.expanduser("~") + f"/{self.config_file}"
         with open(path, 'w') as fh:
             json.dump(config, fh)
     except Exception as e:
-        print("Problem writing to ~/.spotibar_config.json!")
+        print(f"Problem writing to ~/{self.config_file}!")
         print(e)
 
         print("Here's your config to manually add:")
