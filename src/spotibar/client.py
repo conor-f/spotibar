@@ -158,6 +158,16 @@ class SpotibarClient():
     def get_current_track_id(self):
         return self.client.currently_playing()['item']['id']
 
+    def get_track_id_from_name(self, artist_name, track_name):
+        results = self.client.search(
+            q=f'artist:{artist_name} track: {track_name}', type='track'
+        )
+
+        try:
+            return results['tracks']['items'][0]['id']
+        except Exception:
+            return None
+
     def get_user_playlists(self):
         '''
         Returns a list of dicts representing all the users playlists.
