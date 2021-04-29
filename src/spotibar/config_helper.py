@@ -4,9 +4,9 @@ import os
 
 class SpotibarConfig():
 
-    def __init__(self):
-        self.path = os.path.expanduser("~") + "/.spotibar_config.json"
-        pass
+    def __init__(self, *args, **kwargs):
+        self.config_file = kwargs.get('config_file', '.spotibar_config.json')
+        self.path = os.path.expanduser("~") + "/" + self.config_file
 
     def get(self, key, default):
         if not os.path.exists(self.path):
@@ -20,7 +20,7 @@ class SpotibarConfig():
                 else:
                     return default
         except Exception as e:
-            print("Problem reading from ~/.spotibar_config.json!")
+            print(f"Problem reading from ~/{self.config_file}!")
             print(e)
 
     def set(self, key, value):
@@ -30,7 +30,7 @@ class SpotibarConfig():
             with open(self.path, 'r') as fh:
                 config = json.load(fh)
         except Exception as e:
-            print("Problem reading from ~/.spotibar_config.json!")
+            print(f"Problem reading from ~/{self.config_file}!")
             print(e)
 
             return
@@ -41,7 +41,7 @@ class SpotibarConfig():
             with open(self.path, 'w') as fh:
                 json.dump(config, fh)
         except Exception as e:
-            print("Problem writing to ~/.spotibar_config.json!")
+            print(f"Problem writing to ~/{self.config_file}!")
             print(e)
 
             return

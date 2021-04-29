@@ -12,12 +12,14 @@ from .popups import ConfigPopup
 
 class SpotibarClient():
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         '''
-        TODO: Add args/kwargs here.
+        :kwarg config_file: String path relative to ~/ of a config file to load.
         '''
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
-        self.config = SpotibarConfig()
+
+        self.config_file = kwargs.get('config_file', '.spotibar_config.json')
+        self.config = SpotibarConfig(config_file=self.config_file)
 
         self.client_id = self.config.get('client_id', None)
         self.client_secret = self.config.get('client_secret', None)
@@ -64,7 +66,7 @@ class SpotibarClient():
                     password_hash=self.config.get('lastfm_password_hash', None),
                 )
             except Exception as e:
-                print("Please configure ~/.spotibar_config.json with last.fm details.")
+                print(f"Please configure ~/{self.config_file} with last.fm details.")
                 print(e)
 
     def auth(self):
@@ -296,11 +298,11 @@ def first_run():
     spotibar_client.auth()
 
     try:
-        path = os.path.expanduser("~") + "/.spotibar_config.json"
+        path = os.path.expanduser("~") + f"/{self.config_file}"
         with open(path, 'w') as fh:
             json.dump(config, fh)
     except Exception as e:
-        print("Problem writing to ~/.spotibar_config.json!")
+        print(f"Problem writing to ~/{self.config_file}!")
         print(e)
 
         print("Here's your config to manually add:")
