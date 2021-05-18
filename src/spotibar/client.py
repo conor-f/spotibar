@@ -240,7 +240,7 @@ class SpotibarClient():
             create_if_empty=create_if_empty
         )
 
-    def add_track_to_playlist(self, track_id, playlist_id):
+    def add_track_to_playlist(self, playlist_id, track_id):
         self.client.playlist_add_items(playlist_id, [track_id])
 
     def add_current_track_to_monthly_playlist(self):
