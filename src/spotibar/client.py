@@ -270,6 +270,16 @@ class SpotibarClient():
         '''
         return self.is_currently_playing()
 
+    def get_current_album_image_url(self):
+        '''
+        Return a string of the URL of the album cover.
+        '''
+        if self.is_live():
+            currently_playing = self.client.currently_playing()
+            return currently_playing['item']['album']['images'][0]['url']
+
+        return ''
+
 
 def first_run():
     '''
