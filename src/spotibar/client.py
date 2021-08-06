@@ -333,7 +333,8 @@ def first_run():
     spotibar_client.auth()
 
     try:
-        path = os.path.expanduser("~") + f"/{self.config_file}"
+        config_file_dir = spotibar_client.config_file
+        path = os.path.expanduser("~") + f"/{config_file_dir}"
         with open(path, 'w') as fh:
             json.dump(config, fh)
     except Exception as e:
