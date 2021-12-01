@@ -31,7 +31,7 @@ options.
 ```
 {
   "client_id": "XXXXX",
-  "client_secret": "XXXXX",
+  "client_secret": "XXXXX"
 }
 ```
   After getting these values from the Spotify Developer Console, you need to add a redirect URL. Click "Edit Settings" and paste `http://127.0.0.1` under *Redirect URIs*.
