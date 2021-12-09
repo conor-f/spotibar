@@ -27,7 +27,7 @@ class SpotibarClient():
             self.config.get('currently_playing_trunclen', 45)
         )
 
-        self.redirect_uri = "http://127.0.0.1"
+        self.redirect_uri = "http://127.0.0.1:8080"
         self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
 
         if not os.path.exists(self.cache_dir):
@@ -52,7 +52,8 @@ class SpotibarClient():
                 client_id=self.client_id,
                 client_secret=self.client_secret,
                 redirect_uri=self.redirect_uri,
-                cache_path=f"{self.cache_dir}/{self.cache_file}"
+                cache_path=f"{self.cache_dir}/{self.cache_file}",
+                open_browser=False
             )
         )
 
