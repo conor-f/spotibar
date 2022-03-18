@@ -21,7 +21,7 @@ build:
 	rm -fr dist/
 	$(IN_ENV) $(PYTHON) setup.py sdist bdist_wheel
 
-build_dist:
+build_dist: setup
 	rm -fr dist/
 	$(IN_ENV) python setup.py sdist
 
