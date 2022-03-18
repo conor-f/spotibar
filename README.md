@@ -89,5 +89,4 @@ format-padding = 2
   Done! Enjoy! File (probably inevitable) bug reports as issues!
 
 ## Development:
-  Create an issue if you have any bug reports/feature requests/want to add
-a feature and are looking for help with the environment setup.
+  Create an issue if you have any bug reports/feature requests/want to add a feature and are looking for help with the environment setup.
