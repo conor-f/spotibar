@@ -22,7 +22,7 @@ jobs:
         sudo apt-get install make
 
     - name: Build package
-      run: make build_dist
+      run: sudo make build_dist
 
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
