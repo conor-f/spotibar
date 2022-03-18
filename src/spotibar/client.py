@@ -21,13 +21,19 @@ class SpotibarClient():
         self.config_file = kwargs.get('config_file', '.spotibar_config.json')
         self.config = SpotibarConfig(config_file=self.config_file)
 
-        self.client_id = self.config.get('client_id', None)
-        self.client_secret = self.config.get('client_secret', None)
+        self.client_id = self.config.get(
+            'client_id',
+            kwargs.get('client_id', None)
+        )
+        self.client_secret = self.config.get(
+            'client_secret',
+            kwargs.get('client_secret', None)
+        )
         self.currently_playing_trunclen = int(
             self.config.get('currently_playing_trunclen', 45)
         )
 
-        self.redirect_uri = "http://127.0.0.1:8080"
+        self.redirect_uri = "http://127.0.0.1"
         self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
 
         if not os.path.exists(self.cache_dir):
@@ -330,7 +336,10 @@ def first_run():
     response = input("\tSpotify client secret: ")
     config['client_secret'] = response
 
-    spotibar_client = SpotibarClient()
+    spotibar_client = SpotibarClient(
+        client_id=config['client_id'],
+        client_secret=config['client_secret']
+    )
     spotibar_client.auth()
 
     try:
@@ -339,7 +348,7 @@ def first_run():
         with open(path, 'w') as fh:
             json.dump(config, fh)
     except Exception as e:
-        print(f"Problem writing to ~/{self.config_file}!")
+        print(f"Problem writing config file:")
         print(e)
 
         print("Here's your config to manually add:")
@@ -349,8 +358,6 @@ def first_run():
 
 
 def main():
-    spotibar_client = SpotibarClient()
-
     parser = argparse.ArgumentParser(
         description='Entrypoint for Spotify/Polybar integration.'
     )
@@ -368,6 +375,11 @@ def main():
 
     args = parser.parse_args()
 
+    if args.init:
+        first_run()
+
+    spotibar_client = SpotibarClient()
+
     if args.get_currently_playing:
         print(spotibar_client.get_currently_playing_string())
     elif args.previous_track:
@@ -384,8 +396,6 @@ def main():
         ConfigPopup()
     elif args.is_live:
         print(spotibar_client.is_live())
-    elif args.init:
-        first_run()
 
 
 if __name__ == '__main__':
