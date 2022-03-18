@@ -27,25 +27,18 @@ once, and other options. Clicking it will trigger all liking/adding to playlist
 options.
 
 ## Installation:
-  Installation is in three steps, the first is getting credentials from [Spotify](https://developer.spotify.com/dashboard/applications). You need to create an app (call it whatever suits) and take the `Client ID` and `Client Secret` and add them to `~/.spotibar_config.json` as follows:
-```
-{
-  "client_id": "XXXXX",
-  "client_secret": "XXXXX"
-}
-```
-  After getting these values from the Spotify Developer Console, you need to add a redirect URL. Click "Edit Settings" and paste `http://127.0.0.1` under *Redirect URIs*.
-  Secondly, you need to install and authenticate `spotibar`:
+  Installation is in three steps, the first is getting credentials from [Spotify](https://developer.spotify.com/dashboard/applications). You need to create an app (call it whatever you like) to find your `Client ID` and `Client Secret`, and you need to `Edit Settings`, and set the `Redirect URIs` to `http://127.0.0.1`.
+
+  Secondly, you need to install `spotibar` and run it's `init` processes:
 ```
 python3 -m pip install spotibar
-spotibar --auth
+spotibar --init
 ```
-  This should open up a browser at `127.0.0.1`. Copy the entire URL and paste
-it back into the terminal window you ran `spotibar --auth` from. You should see
-a message similar to `Successfully authenticated.`.
+
+  During this install process, you will be directed to open a browser to allow Spotibar interact with your Spotify account. After accepting this, you will be redirected to a URL beginning with `http://127.0.0.1`. Copy this whole URL and paste it back into the init process when asked!
 
   If you're getting errors, try removing spotibar and reinstalling under sudo permissions. If you get an error involving `libtk8.6.so`, install tk using your distro's package manager.
-  
+
   Once `spotibar` is installed and authenticated, you need to modify your
 polybar config as follows (or however suits your needs!):
 ```
@@ -94,9 +87,6 @@ format-padding = 2
 ```
 
   Done! Enjoy! File (probably inevitable) bug reports as issues!
-
-  If you like, you can run `spotibar --init` in order to get some extra
-features like LastFM integration.
 
 ## Development:
   Create an issue if you have any bug reports/feature requests/want to add
