@@ -1,8 +1,10 @@
 from .config_helper import SpotibarConfig
 from tkinter import *
-
+from .translate import Translatore
 
 class ConfigPopup():
+
+    translator = Translatore()
 
     def __init__(self):
         self.root = Tk(className="Spotibar")
@@ -24,21 +26,21 @@ class ConfigPopup():
             self.config.get('currently_playing_trunclen', 45)
         )
 
-        Label(self.root, text="Put to monthly playlist?").grid(row=0, column=0)
+        Label(self.root, text=self.translator.translate("Put to monthly playlist?")).grid(row=0, column=0)
         Checkbutton(
             self.root,
             variable=self.should_put_to_monthly_playlist,
             command=self.handle_should_put_to_monthly_playlist_change
         ).grid(row=0, column=1)
 
-        Label(self.root, text="Heart on last.fm?").grid(row=1, column=0)
+        Label(self.root, text=self.translator.translate("Heart on last.fm?")).grid(row=1, column=0)
         Checkbutton(
             self.root,
             variable=self.should_heart_on_lastfm,
             command=self.handle_should_heart_on_lastfm
         ).grid(row=1, column=1)
 
-        Label(self.root, text="Currently playing max length: ").grid(
+        Label(self.root, text=self.translator.translate("Currently playing max length: ")).grid(
             row=2,
             column=0
         )
