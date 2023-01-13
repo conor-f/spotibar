@@ -4,6 +4,8 @@ import os
 import pylast
 import spotipy
 
+from spotibar.translate import Translatore
+
 from .config_helper import SpotibarConfig
 from datetime import datetime
 from getpass import getpass
@@ -11,6 +13,7 @@ from .popups import ConfigPopup
 
 
 class SpotibarClient():
+    __translator = Translatore()
 
     def __init__(self, *args, **kwargs):
         '''
@@ -29,6 +32,7 @@ class SpotibarClient():
             'client_secret',
             kwargs.get('client_secret', None)
         )
+
         self.currently_playing_trunclen = int(
             self.config.get('currently_playing_trunclen', 45)
         )
@@ -73,7 +77,8 @@ class SpotibarClient():
                     password_hash=self.config.get('lastfm_password_hash', None),
                 )
             except Exception as e:
-                print(f"Please configure ~/{self.config_file} with last.fm details.")
+                message = self.__translator.translate("Please configure ~/")
+                print(f"{message} {self.config_file} with last.fm details.")
                 print(e)
 
     def auth(self):
@@ -82,24 +87,32 @@ class SpotibarClient():
         sorted out its permissions from Spotify.
         '''
         self.is_currently_playing()
-        print("Successfully authenticated.")
+        message = self.__translator.translate(
+            "Successfully authenticated."   
+        )
+        print(message)
 
     def get_user_id(self):
-        return self.client.me()['id']
+        me = self.client.me()
+        if me is not None:
+            return me['id']
 
     def get_current_device_id(self):
         # Get devices (needed if Spotify is paused for a period of time)
         # Lets just presume we're using the first one:
 
         devices = self.client.devices()
-        return devices['devices'][0]['id']
+        if devices is not None:
+            return devices['devices'][0]['id']
 
     def is_currently_playing(self):
         '''
         Returns True if there is a currently playing song, False otherwise.
         '''
         try:
-            return self.client.currently_playing()['is_playing']
+            current_play = self.client.currently_playing()
+            if current_play is not None:
+                current_play['is_playing']
         except Exception:
             return False
 
@@ -144,26 +157,31 @@ class SpotibarClient():
         Returns the string ready for polybar
         '''
         try:
-            current_track_name = self.client.currently_playing()['item']['name']
-            current_artist_name = ', '.join(
-                [
-                    artist['name']
-                    for artist in self.client.currently_playing()['item']['artists']
-                ]
-            )
+            current_play = self.client.currently_playing()
 
-            current_string = f"{current_track_name} by {current_artist_name}"
+            if current_play is not None:
+                current_track_name = current_play['item']['name']
+                current_artist_name = ', '.join(
+                    [
+                        artist['name']
+                        for artist in current_play['item']['artists']
+                    ]
+                )
 
-            if len(current_string) > self.currently_playing_trunclen:
-                return current_string[:self.currently_playing_trunclen - 3] \
-                    + "..."
-            else:
-                return current_string
+                current_string = f"{current_track_name} by {current_artist_name}"
+
+                if len(current_string) > self.currently_playing_trunclen:
+                    return current_string[:self.currently_playing_trunclen - 3] \
+                        + "..."
+                else:
+                    return current_string
         except Exception:
             return ""
 
     def get_current_track_id(self):
-        return self.client.currently_playing()['item']['id']
+        current_play = self.client.currently_playing()
+        if current_play is not None:
+            return current_play['item']['id']
 
     def get_track_id_from_name(self, artist_name, track_name):
         results = self.client.search(
@@ -171,7 +189,8 @@ class SpotibarClient():
         )
 
         try:
-            return results['tracks']['items'][0]['id']
+            if results is not None:
+                return results['tracks']['items'][0]['id']
         except Exception:
             return None
 
@@ -189,15 +208,15 @@ class SpotibarClient():
           }, ..
         ]
         '''
-        return [
-            {
-                'name': playlist['name'],
-                'id': playlist['id']
-            }
-            for playlist in self.client.user_playlists(
-                user=self.get_user_id()
-            )['items']
-        ]
+        user_pls = self.client.user_playlist(self.get_user_id())
+        if user_pls is not None:
+            return [
+                {
+                    'name': playlist['name'],
+                    'id': playlist['id']
+                }
+                for playlist in user_pls['items']
+            ]
 
     def create_playlist(self, name, public=False):
         '''
@@ -214,23 +233,23 @@ class SpotibarClient():
         exist, create it.
         '''
         playlists = self.get_user_playlists()
+        if playlists is not None:
+            playlist_id = [
+                playlist['id'] for playlist in playlists
+                if playlist['name'] == name
+            ]
 
-        playlist_id = [
-            playlist['id'] for playlist in playlists
-            if playlist['name'] == name
-        ]
-
-        if len(playlist_id) == 0 and create_if_empty:
-            self.create_playlist(name)
-            return self.get_monthly_playlist_id(
-                name,
-                create_if_empty=create_if_empty
-            )
-        elif len(playlist_id) == 1:
-            return playlist_id[0]
-        else:
-            print("TODO: ERROR HANDLING! SHOULDN'T BE POSSIBLE.")
-            return playlist_id[0]
+            if len(playlist_id) == 0 and create_if_empty:
+                self.create_playlist(name)
+                return self.get_monthly_playlist_id(
+                    name,
+                    create_if_empty=create_if_empty
+                )
+            elif len(playlist_id) == 1:
+                return playlist_id[0]
+            else:
+                print("TODO: ERROR HANDLING! SHOULDN'T BE POSSIBLE.")
+                return playlist_id[0]
 
     def get_monthly_playlist_id(self, name_format="%m ¦¦ %y", create_if_empty=True):
         '''
@@ -263,12 +282,18 @@ class SpotibarClient():
 
                 # TODO: Hacky. Works as long as the artist doesn't use the word
                 # ' by '
-                artist = currently_playing.split(' by ')[-1]
-                track = ' '.join(currently_playing.split(' by ')[:-1])
+                if currently_playing is not None:
+                    artist = currently_playing.split(' by ')[-1]
+                    track = ' '.join(currently_playing.split(' by ')[:-1])
 
-                self.lastfm_client.get_track(artist, track).love()
+                    if self.lastfm_client is not None:
+                        self.lastfm_client.get_track(artist, track).love()
             except Exception as e:
-                print("Hearting track on lastfm failed.")
+                
+                message = self.__translator.translate(
+                  "Hearting track on lastfm failed."  
+                )
+                print(message)
                 print(e)
 
     def is_live(self):
@@ -283,31 +308,43 @@ class SpotibarClient():
         '''
         if self.is_live():
             currently_playing = self.client.currently_playing()
-            return currently_playing['item']['album']['images'][0]['url']
-
+            if currently_playing is not None:
+                return currently_playing['item']['album']['images'][0]['url']
         return ''
 
 
-def first_run():
+def first_run(__translator: Translatore):
     '''
     Runs the first time Spotibar is initialized. Gives a basic interactive menu
     and asks the user for details to init the config file.
     '''
-    print("\tWelcome to Spotibar!")
-    print("This script will set up the initial config file and enable/disable/configure features based on your preferences.")
+    welcome_message = __translator.translate(
+     "\tWelcome to Spotibar!"   
+    )
+    config_message = __translator.translate(
+     "This script will set up the initial config file and enable/disable/configure features based on your preferences."   
+    )
+    print(welcome_message)
+    print(config_message)
 
     config = {}
 
-    response = input("Do you want to add tracks to a monthly playlist? [Y/n]")
+    monthly_playlist_message = __translator.translate(
+        "Do you want to add tracks to a monthly playlist?"
+    )
+    response = input(monthly_playlist_message + "[Y/n]")
     if response == "" or response.lower() == "y":
         config['should_put_to_monthly_playlist'] = True
     else:
         config['should_put_to_monthly_playlist'] = False
 
-    response = input("Do you want to set up LastFM track hearting? [Y/n]")
+    lastfm_message = __translator.translate(
+        "Do you want to set up LastFM track hearting?"
+    )
+    response = input(lastfm_message + "[Y/n]")
     if response == "" or response.lower() == "y":
-        print("Setting up LastFM track hearting...")
-        print("\tPlease go to https://www.last.fm/api/account/create to get your credentials:")
+        print(__translator.translate("Setting up LastFM track hearting..."))
+        print(__translator.translate("Please go to https://www.last.fm/api/account/create to get your credentials:"))
 
         config['should_heart_on_lastfm'] = True
 
@@ -328,9 +365,9 @@ def first_run():
         config['lastfm_api_secret'] = ''
         config['lastfm_username'] = ''
         config['lastfm_password_hash'] = ''
-        print("Skipping LastFM track hearting setup.")
+        print(__translator.translate("Skipping LastFM track hearting setup."))
 
-    print("Please go to https://developer.spotify.com/dashboard/applications to set up an application to get the following API keys. See the README for more details.")
+    print(__translator.translate("Please go to https://developer.spotify.com/dashboard/applications to set up an application to get the following API keys. See the README for more details."))
     response = input("\tSpotify client ID: ")
     config['client_id'] = response
     response = input("\tSpotify client secret: ")
@@ -348,10 +385,16 @@ def first_run():
         with open(path, 'w') as fh:
             json.dump(config, fh)
     except Exception as e:
-        print(f"Problem writing config file:")
+        message_err = __translator.translate(
+         "Problem writing config file:"
+        )
+        print(message_err)
         print(e)
 
-        print("Here's your config to manually add:")
+        message_config = __translator.translate(
+         "Here's your config to manually add:"   
+        )
+        print(message_config)
         print(config)
 
         return
@@ -375,8 +418,9 @@ def main():
 
     args = parser.parse_args()
 
+    __translator = Translatore()
     if args.init:
-        first_run()
+        first_run(__translator)
 
     spotibar_client = SpotibarClient()
 

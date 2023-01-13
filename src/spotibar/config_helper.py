@@ -1,8 +1,9 @@
 import json
 import os
-
+from .translate import Translatore
 
 class SpotibarConfig():
+    translator = Translatore()
 
     def __init__(self, *args, **kwargs):
         self.config_file = kwargs.get('config_file', '.spotibar_config.json')
@@ -20,7 +21,8 @@ class SpotibarConfig():
                 else:
                     return default
         except Exception as e:
-            print(f"Problem reading from ~/{self.config_file}!")
+            message = self.translator.translate("Problem reading from ~/")
+            print(f"{ message } {self.config_file}!")
             print(e)
 
     def set(self, key, value):
@@ -30,7 +32,8 @@ class SpotibarConfig():
             with open(self.path, 'r') as fh:
                 config = json.load(fh)
         except Exception as e:
-            print(f"Problem reading from ~/{self.config_file}!")
+            message = self.translator.translate("Problem reading from ~/")
+            print(f"{ message } {self.config_file}!")
             print(e)
 
             return
@@ -41,7 +44,8 @@ class SpotibarConfig():
             with open(self.path, 'w') as fh:
                 json.dump(config, fh)
         except Exception as e:
-            print(f"Problem writing to ~/{self.config_file}!")
+            message = self.translator.translate("Problem writing to ~/")
+            print(f"{ message } {self.config_file}!")
             print(e)
 
             return
