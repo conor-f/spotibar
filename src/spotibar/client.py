@@ -3,6 +3,7 @@ import json
 import os
 import pylast
 import spotipy
+import subprocess
 
 from .config_helper import SpotibarConfig
 from datetime import datetime
@@ -41,9 +42,9 @@ class SpotibarClient():
 
         self.cache_file = "auth_cache"
 
-        self.client = self.get_client()
-
-        self.lastfm_client = self.get_lastfm_client()
+        if kwargs.get("require_clients", True):
+            self.client = self.get_client()
+            self.lastfm_client = self.get_lastfm_client()
 
     def get_client(self):
         '''
@@ -271,11 +272,18 @@ class SpotibarClient():
                 print("Hearting track on lastfm failed.")
                 print(e)
 
+    def is_playing_locally(self):
+        """
+        Returns True if dbus thinks we are currently playing Spotify locally, False otherwise.
+        """
+        cmd = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|egrep -A 1 \"string\"|cut -b 26-|cut -d '\"' -f 1|egrep -v ^$"
+        return subprocess.check_output(cmd, shell=True, text=True) == "Playing"
+
     def is_live(self):
         '''
         Returns True if Spotify is currently playing, False otherwise.
         '''
-        return self.is_currently_playing()
+        return self.is_playing_locally() or self.is_currently_playing()
 
     def get_current_album_image_url(self):
         '''
@@ -395,7 +403,7 @@ def main():
     elif args.config_popup:
         ConfigPopup()
     elif args.is_live:
-        print(spotibar_client.is_live())
+        print(spotibar_client.is_live(require_clients=False))
 
 
 if __name__ == '__main__':
