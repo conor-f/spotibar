@@ -293,7 +293,7 @@ class SpotibarClient():
         """
         Returns True if Spotibar found that Spotify was playing within the last seconds.
         """
-        last_timestamp = self.config.get("last_playing_timestamp")
+        last_timestamp = self.config.get("last_playing_timestamp", 0)
         current_timestamp = self.get_simple_timestamp()
 
         return (current_timestamp - last_timestamp) < seconds
