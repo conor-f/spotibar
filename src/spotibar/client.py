@@ -272,18 +272,41 @@ class SpotibarClient():
                 print("Hearting track on lastfm failed.")
                 print(e)
 
+    def get_simple_timestamp(self):
+        """
+        Return a simple int timestamp.
+        """
+        return int(datetime.now().timestamp())
+
     def is_playing_locally(self):
         """
         Returns True if dbus thinks we are currently playing Spotify locally, False otherwise.
         """
         cmd = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|egrep -A 1 \"string\"|cut -b 26-|cut -d '\"' -f 1|egrep -v ^$"
-        return subprocess.check_output(cmd, shell=True, text=True) == "Playing"
+        if subprocess.check_output(cmd, shell=True, text=True) == "Playing":
+            self.config.set("last_playing_timestamp", self.get_simple_timestamp())
+            return True
+
+        return False
+
+    def was_playing_recently(self, seconds=20):
+        """
+        Returns True if Spotibar found that Spotify was playing within the last seconds.
+        """
+        last_timestamp = self.config.get("last_playing_timestamp")
+        current_timestamp = self.get_simple_timestamp()
+
+        return (current_timestamp - last_timestamp) < seconds
 
     def is_live(self):
         '''
         Returns True if Spotify is currently playing, False otherwise.
         '''
-        return self.is_playing_locally() or self.is_currently_playing()
+        return (
+            self.is_playing_locally() or
+            self.was_playing_recently() or
+            self.is_currently_playing()
+        )
 
     def get_current_album_image_url(self):
         '''
