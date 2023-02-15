@@ -409,7 +409,7 @@ def main():
     if args.init:
         first_run()
 
-    spotibar_client = SpotibarClient()
+    spotibar_client = SpotibarClient(require_clients=False) if args.is_live else SpotibarClient()
 
     if args.get_currently_playing:
         print(spotibar_client.get_currently_playing_string())
@@ -426,7 +426,7 @@ def main():
     elif args.config_popup:
         ConfigPopup()
     elif args.is_live:
-        print(spotibar_client.is_live(require_clients=False))
+        print(spotibar_client.is_live())
 
 
 if __name__ == '__main__':
