@@ -37,6 +37,9 @@ class SpotibarClient:
 
         self.cache_file = "auth_cache"
 
+        self.client = None
+        self.lastfm_client = None
+
         if kwargs.get("require_clients", True):
             self.client = self.get_client()
             self.lastfm_client = self.get_lastfm_client()
@@ -273,7 +276,7 @@ class SpotibarClient:
         Returns True if dbus thinks we are currently playing Spotify locally, False otherwise.
         """
         cmd = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|egrep -A 1 \"string\"|cut -b 26-|cut -d '\"' -f 1|egrep -v ^$"
-        if subprocess.check_output(cmd, shell=True, text=True) == "Playing":
+        if subprocess.check_output(cmd, shell=True, text=True).strip() == "Playing":
             self.config.set("last_playing_timestamp", self.get_simple_timestamp())
             return True
 
