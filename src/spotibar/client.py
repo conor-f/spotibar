@@ -95,6 +95,9 @@ class SpotibarClient:
         Returns True if there is a currently playing song, False otherwise.
         """
         try:
+            if self.client is None:
+                self.client = self.get_client()
+
             currently_playing = self.client.currently_playing()["is_playing"]
             if currently_playing:
                 self.config.set("last_playing_timestamp", self.get_simple_timestamp())
