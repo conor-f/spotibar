@@ -276,11 +276,15 @@ class SpotibarClient:
         Returns True if dbus thinks we are currently playing Spotify locally, False otherwise.
         """
         cmd = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get string:'org.mpris.MediaPlayer2.Player' string:'PlaybackStatus'|egrep -A 1 \"string\"|cut -b 26-|cut -d '\"' -f 1|egrep -v ^$"
-        if subprocess.check_output(cmd, shell=True, text=True).strip() == "Playing":
-            self.config.set("last_playing_timestamp", self.get_simple_timestamp())
-            return True
+        try:
+            if subprocess.check_output(cmd, shell=True, text=True).strip() == "Playing":
+                self.config.set("last_playing_timestamp", self.get_simple_timestamp())
+                return True
 
-        return False
+            return False
+        except Exception as e:
+            # This is an expected case if X11 isn't running. Just return False.
+            return False
 
     def was_playing_recently(self, seconds=20):
         """
