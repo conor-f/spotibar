@@ -18,7 +18,7 @@ class SpotibarClient:
         """
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
 
-        self.config_file = kwargs.get("config_file", ".spotibar_config.json")
+        self.config_file = kwargs.get("config_file", "~/.spotibar_config.json")
         self.config = SpotibarConfig(config_file=self.config_file)
 
         self.client_id = self.config.get("client_id", kwargs.get("client_id", None))
@@ -30,7 +30,8 @@ class SpotibarClient:
         )
 
         self.redirect_uri = "http://127.0.0.1"
-        self.cache_dir = os.path.expanduser("~") + "/.spotibar_cache"
+
+        self.cache_dir = "/tmp/.spotibar_cache"
 
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
@@ -72,7 +73,7 @@ class SpotibarClient:
                     password_hash=self.config.get("lastfm_password_hash", None),
                 )
             except Exception as e:
-                print(f"Please configure ~/{self.config_file} with last.fm details.")
+                print(f"Please configure {self.config_file} with last.fm details.")
                 print(e)
 
     def auth(self):
@@ -379,9 +380,10 @@ def first_run():
 
     try:
         config_file_dir = spotibar_client.config_file
-        path = os.path.expanduser("~") + f"/{config_file_dir}"
-        with open(path, "w") as fh:
+
+        with open(config_file_dir, "w") as fh:
             json.dump(config, fh)
+
     except Exception as e:
         print(f"Problem writing config file:")
         print(e)
