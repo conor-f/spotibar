@@ -18,7 +18,11 @@ class SpotibarClient:
         """
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
 
-        self.config_file = kwargs.get("config_file", "~/.spotibar_config.json")
+        self.config_file = kwargs.get("config_file")
+
+        if not self.config_file:
+            raise Exception("A config_file must be passed.")
+
         self.config = SpotibarConfig(config_file=self.config_file)
 
         self.client_id = self.config.get("client_id", kwargs.get("client_id", None))
@@ -31,12 +35,13 @@ class SpotibarClient:
 
         self.redirect_uri = "http://127.0.0.1"
 
-        self.cache_dir = "/tmp/.spotibar_cache"
+        self.auth_cache = self.config.get(
+            "auth_cache_path", kwargs.get(
+                "auth_cache_path", "~/.spotibar_cache/auth_cache"
+            )
+        )
 
-        if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
-
-        self.cache_file = "auth_cache"
+        os.makedirs(os.path.dirname(self.auth_cache), exist_ok=True)
 
         self.client = None
         self.lastfm_client = None
@@ -58,7 +63,7 @@ class SpotibarClient:
                 client_id=self.client_id,
                 client_secret=self.client_secret,
                 redirect_uri=self.redirect_uri,
-                cache_path=f"{self.cache_dir}/{self.cache_file}",
+                cache_path=self.auth_cache,
                 open_browser=False,
             )
         )
@@ -378,10 +383,13 @@ def first_run():
     )
     spotibar_client.auth()
 
-    try:
-        config_file_dir = spotibar_client.config_file
+    print("Where should we write this config?")
+    response = input("\tFilepath: [~/.spotibar_config.json]")
 
-        with open(config_file_dir, "w") as fh:
+    config_filepath = "~/.spotibar_config.json" if response == "" else response
+
+    try:
+        with open(config_filepath, "w") as fh:
             json.dump(config, fh)
 
     except Exception as e:
@@ -389,7 +397,7 @@ def first_run():
         print(e)
 
         print("Here's your config to manually add:")
-        print(config)
+        print(json.dumps(config))
 
         return
 
@@ -398,6 +406,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Entrypoint for Spotify/Polybar integration."
     )
+
+    parser.add_argument("--config-filepath", default="~/.spotibar_config.json")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--get-currently-playing", action="store_true")
@@ -416,7 +426,12 @@ def main():
         first_run()
 
     spotibar_client = (
-        SpotibarClient(require_clients=False) if args.is_live else SpotibarClient()
+        SpotibarClient(
+            config_file=args.config_filepath,
+            require_clients=False
+        ) if args.is_live else SpotibarClient(
+            config_file=args.config_filepath
+        )
     )
 
     if args.get_currently_playing:
