@@ -378,15 +378,23 @@ def first_run():
     response = input("\tSpotify client secret: ")
     config["client_secret"] = response
 
-    spotibar_client = SpotibarClient(
-        client_id=config["client_id"], client_secret=config["client_secret"]
-    )
-    spotibar_client.auth()
-
     print("Where should we write this config?")
     response = input("\tFilepath: [~/.spotibar_config.json]")
 
     config_filepath = "~/.spotibar_config.json" if response == "" else response
+
+    print("Where should we cache your authentication tokens?")
+    response = input("\tFilepath: [~/.spotibar_auth_cache]")
+
+    auth_filepath = "~/.spotibar_auth_cache" if response == "" else response
+
+    spotibar_client = SpotibarClient(
+        client_id=config["client_id"],
+        client_secret=config["client_secret"],
+        config_file=config_filepath,
+        auth_cache_path=auth_filepath,
+    )
+    spotibar_client.auth()
 
     try:
         with open(config_filepath, "w") as fh:
@@ -408,6 +416,10 @@ def main():
     )
 
     parser.add_argument("--config-filepath", default="~/.spotibar_config.json")
+    parser.add_argument(
+        "--auth-filepath",
+        default="~/.spotibar_cache/auth_cache"
+    )
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--get-currently-playing", action="store_true")
@@ -428,9 +440,11 @@ def main():
     spotibar_client = (
         SpotibarClient(
             config_file=args.config_filepath,
-            require_clients=False
+            require_clients=False,
+            auth_cache_path=args.auth_filepath,
         ) if args.is_live else SpotibarClient(
-            config_file=args.config_filepath
+            config_file=args.config_filepath,
+            auth_cache_path=args.auth_filepath,
         )
     )
 
