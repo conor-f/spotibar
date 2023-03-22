@@ -334,13 +334,13 @@ def first_run():
 
     config = {}
 
-    response = input("Do you want to add tracks to a monthly playlist? [Y/n]")
+    response = input("Do you want to add tracks to a monthly playlist? [Y/n] ")
     if response == "" or response.lower() == "y":
         config["should_put_to_monthly_playlist"] = True
     else:
         config["should_put_to_monthly_playlist"] = False
 
-    response = input("Do you want to set up LastFM track hearting? [Y/n]")
+    response = input("Do you want to set up LastFM track hearting? [Y/n] ")
     if response == "" or response.lower() == "y":
         print("Setting up LastFM track hearting...")
         print(
@@ -379,12 +379,12 @@ def first_run():
     config["client_secret"] = response
 
     print("Where should we write this config?")
-    response = input("\tFilepath: [~/.spotibar_config.json]")
+    response = input("\tFilepath: [~/.spotibar_config.json] ")
 
     config_filepath = "~/.spotibar_config.json" if response == "" else response
 
     print("Where should we cache your authentication tokens?")
-    response = input("\tFilepath: [~/.spotibar_auth_cache]")
+    response = input("\tFilepath: [~/.spotibar_auth_cache] ")
 
     auth_filepath = "~/.spotibar_auth_cache" if response == "" else response
 
@@ -436,6 +436,8 @@ def main():
 
     if args.init:
         first_run()
+
+        sys.exit(0)
 
     spotibar_client = (
         SpotibarClient(
