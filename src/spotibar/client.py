@@ -277,7 +277,7 @@ class SpotibarClient:
         """
         return int(datetime.now().timestamp())
 
-    def is_playing_locally(self):
+    def is_playing(self):
         """
         Returns True if dbus thinks we are currently playing Spotify locally, False otherwise.
         """
@@ -289,8 +289,9 @@ class SpotibarClient:
 
             return False
         except Exception as e:
-            # This is an expected case if X11 isn't running. Just return False.
-            return False
+            # This is an expected case if X11 isn't running. Do the expensive
+            # check of polling the API:
+            return self.is_currently_playing()
 
     def was_playing_recently(self, seconds=20):
         """
@@ -305,11 +306,7 @@ class SpotibarClient:
         """
         Returns True if Spotify is currently playing, False otherwise.
         """
-        return (
-            self.is_playing_locally()
-            or self.was_playing_recently()
-            or self.is_currently_playing()
-        )
+        return self.is_playing() or self.was_playing_recently()
 
     def get_current_album_image_url(self):
         """
