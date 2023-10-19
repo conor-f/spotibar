@@ -4,6 +4,7 @@ import os
 import pylast
 import spotipy
 import subprocess
+import sys
 
 from .config_helper import SpotibarConfig
 from datetime import datetime
