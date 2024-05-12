@@ -1,7 +1,7 @@
 # Spotibar
 
-  Polybar plugin for Spotify that uses the Spotify Web API. Note that this
-requires a Spotify premium account.
+  Polybar/Waybar plugin for Spotify that uses the Spotify Web API. Note that
+  this requires a Spotify premium account.
 
 ## Features:
   - [x] Display currently playing artist/song
@@ -15,7 +15,7 @@ requires a Spotify premium account.
 ![spotibar_Closed](https://user-images.githubusercontent.com/2671067/111181789-3aa6b000-85a6-11eb-8511-da536700438a.png)
 
 ## Usage/Experience:
-  After installing and configuring `spotibar` to run on your Polybar as
+  After installing and configuring `spotibar` to run on your status bar as
 described below, you should see the currently playing track/artist, interactive
 controls to go to the previous song, play/pause and go to the next track. The
 thing that justifies the little bit of extra work to set up this module is in
@@ -31,7 +31,7 @@ options.
 
   Secondly, you need to install `spotibar` and run it's `init` processes:
 ```
-python3 -m pip install spotibar
+pipx install spotibar
 spotibar --init
 ```
 
@@ -39,8 +39,9 @@ spotibar --init
 
   If you're getting errors, try removing spotibar and reinstalling under sudo permissions. If you get an error involving `libtk8.6.so`, install tk using your distro's package manager.
 
-  Once `spotibar` is installed and authenticated, you need to modify your
-polybar config as follows (or however suits your needs!):
+  Once `spotibar` is installed and authenticated, you need to modify your status bar config as follows (or however suits your needs!):
+
+### Polybar:
 ```
 modules-right = <other modules> spotibar-currently-playing spotibar-previous-track spotibar-toggle-playback spotibar-next-track spotibar-add-to-playlist <other modules>
 
@@ -84,6 +85,40 @@ click-right = spotibar --config-popup
 exec-if = [ $(spotibar --is-live) = "True" ]
 format-underline = #1db954
 format-padding = 2
+```
+
+### Waybar:
+Note that this relies on `mediaplayer.py` to output the currently playing track. This behaviour can easily be modified (e.g. by using `spotibar --get-currently-playing`)
+
+```
+"modules-center": ["custom/media", "custom/media-skip-backward", "custom/media-play-pause", "custom/media-skip-forward"],
+
+"custom/media": {
+  "format": "{icon}   {}",
+  "return-type": "json",
+  "max-length": 40,
+  "format-icons": {
+    "spotify": "",
+    "default": "🎜"
+  },
+  "escape": true,
+  "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null",
+  "on-click-right": "spotibar --add-track-to-monthly-playlist"
+},
+
+"custom/media-play-pause": {
+  "format": "<span size='20pt'>\udb81\udc0e</span>",
+  "on-click": "playerctl play-pause",
+},
+"custom/media-skip-backward": {
+  "format": "<span size='20pt'>\udb81\udcab</span>",
+  "on-click": "playerctl previous",
+},
+"custom/media-skip-forward": {
+  "format": "<span size='20pt'>\udb81\udcac</span>",
+  "on-click": "playerctl next",
+},
+
 ```
 
   Done! Enjoy! File (probably inevitable) bug reports as issues!
