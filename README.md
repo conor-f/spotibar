@@ -121,6 +121,17 @@ Note that this relies on `mediaplayer.py` to output the currently playing track.
 
 ```
 
+You should also modify your `~/.config/waybar/styles.css` to style the buttons added above. e.g.
+
+```
+#custom-media-skip-backward,
+#custom-media-play-pause,
+#custom-media-skip-forward {
+    padding: 0 6px;
+    color: #ffffff;
+}
+```
+
   Done! Enjoy! File (probably inevitable) bug reports as issues!
 
 ## Development:
