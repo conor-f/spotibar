@@ -14,16 +14,12 @@ from .popups import ConfigPopup
 
 class SpotibarClient:
     def __init__(self, *args, **kwargs):
-        """
-        :kwarg config_file: String path relative to ~/ of a config file to load.
-        """
+        """ """
         self.scope = "playlist-read-private playlist-modify-private user-read-playback-state user-modify-playback-state playlist-modify-public"
 
-        self.config_file = kwargs.get("config_file")
+        os.makedirs("~/.config/spotibar/", exist_ok=True)
 
-        if not self.config_file:
-            raise Exception("A config_file must be passed.")
-
+        self.config_file = "~/.config/spotibar/default.json"
         self.config = SpotibarConfig(config_file=self.config_file)
 
         self.client_id = self.config.get("client_id", kwargs.get("client_id", None))
@@ -36,13 +32,7 @@ class SpotibarClient:
 
         self.redirect_uri = "http://127.0.0.1"
 
-        self.auth_cache = self.config.get(
-            "auth_cache_path", kwargs.get(
-                "auth_cache_path", "~/.spotibar_cache/auth_cache"
-            )
-        )
-
-        os.makedirs(os.path.dirname(self.auth_cache), exist_ok=True)
+        self.auth_cache = "~/.cache/spotibar/auth_cache"
 
         self.client = None
         self.lastfm_client = None
@@ -64,7 +54,7 @@ class SpotibarClient:
                 client_id=self.client_id,
                 client_secret=self.client_secret,
                 redirect_uri=self.redirect_uri,
-                cache_path=self.auth_cache,
+                cache_path=os.path.expanduser(self.auth_cache),
                 open_browser=False,
             )
         )
@@ -376,26 +366,16 @@ def first_run():
     response = input("\tSpotify client secret: ")
     config["client_secret"] = response
 
-    print("Where should we write this config?")
-    response = input("\tFilepath: [~/.spotibar_config.json] ")
-
-    config_filepath = "~/.spotibar_config.json" if response == "" else response
-
-    print("Where should we cache your authentication tokens?")
-    response = input("\tFilepath: [~/.spotibar_auth_cache] ")
-
-    auth_filepath = "~/.spotibar_auth_cache" if response == "" else response
-
     spotibar_client = SpotibarClient(
         client_id=config["client_id"],
         client_secret=config["client_secret"],
-        config_file=config_filepath,
-        auth_cache_path=auth_filepath,
     )
     spotibar_client.auth()
 
     try:
-        with open(config_filepath, "w") as fh:
+        os.makedirs(os.path.expanduser("~/.config/spotibar/"), exist_ok=True)
+        os.makedirs(os.path.expanduser("~/.cache/spotibar/"), exist_ok=True)
+        with open(os.path.expanduser("~/.config/spotibar/default.json"), "x") as fh:
             json.dump(config, fh)
 
     except Exception as e:
@@ -411,12 +391,6 @@ def first_run():
 def main():
     parser = argparse.ArgumentParser(
         description="Entrypoint for Spotify/Polybar integration."
-    )
-
-    parser.add_argument("--config-filepath", default="~/.spotibar_config.json")
-    parser.add_argument(
-        "--auth-filepath",
-        default="~/.spotibar_cache/auth_cache"
     )
 
     group = parser.add_mutually_exclusive_group()
@@ -437,16 +411,10 @@ def main():
 
         sys.exit(0)
 
-    spotibar_client = (
-        SpotibarClient(
-            config_file=args.config_filepath,
-            require_clients=False,
-            auth_cache_path=args.auth_filepath,
-        ) if args.is_live else SpotibarClient(
-            config_file=args.config_filepath,
-            auth_cache_path=args.auth_filepath,
-        )
-    )
+    if args.is_live:
+        spotibar_client = SpotibarClient(require_clients=False)
+    else:
+        spotibar_client = SpotibarClient()
 
     if args.get_currently_playing:
         print(spotibar_client.get_currently_playing_string())

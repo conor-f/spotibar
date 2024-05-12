@@ -4,20 +4,15 @@ import os
 
 class SpotibarConfig:
     def __init__(self, *args, **kwargs):
-        self.config_file = kwargs.get("config_file", ".spotibar_config.json")
-
-        self.path = os.path.expanduser("~") + "/" + self.config_file
-
-        # If we supply an absolute path, use that instead of expanding the home
-        # dir.
-        if self.config_file[0] == "/":
-            self.path = self.config_file
+        self.config_file = os.path.expanduser(
+            kwargs.get("config_file", "~/.config/spotibar/default.json")
+        )
 
     def get(self, key, default):
-        if not os.path.exists(self.path):
+        if not os.path.exists(self.config_file):
             return default
         try:
-            with open(self.path, "r") as fh:
+            with open(self.config_file, "r") as fh:
                 config = json.load(fh)
 
                 if key in config.keys():
@@ -25,17 +20,17 @@ class SpotibarConfig:
                 else:
                     return default
         except Exception as e:
-            print(f"Problem reading from ~/{self.config_file}!")
+            print(f"Problem reading from {self.config_file}!")
             print(e)
 
     def set(self, key, value):
         config = None
 
         try:
-            with open(self.path, "r") as fh:
+            with open(self.config_file, "r") as fh:
                 config = json.load(fh)
         except Exception as e:
-            print(f"Problem reading from ~/{self.config_file}!")
+            print(f"Problem reading from {self.config_file}!")
             print(e)
 
             return
@@ -43,10 +38,10 @@ class SpotibarConfig:
         config[key] = value
 
         try:
-            with open(self.path, "w") as fh:
+            with open(self.config_file, "w") as fh:
                 json.dump(config, fh)
         except Exception as e:
-            print(f"Problem writing to ~/{self.config_file}!")
+            print(f"Problem writing to {self.config_file}!")
             print(e)
 
             return
